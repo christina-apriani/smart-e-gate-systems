@@ -24,7 +24,7 @@ Full-stack: sensor IoT → pemrosesan AI → sinkronisasi API pemerintah → kep
 
 Smart E-Gate Systems adalah sistem gerbang pintar untuk truk peti kemas di KEK. Saat truk mendekat, sistem
 menangkap data sensor, memprosesnya dengan AI, memverifikasi dokumen ke instansi pemerintah, lalu memutuskan
-membuka atau mengunci palang — semuanya otomatis, tanpa truk berhenti total, dalam hitungan milidetik.
+membuka atau mengunci palang - semuanya otomatis, tanpa truk berhenti total, dalam hitungan milidetik.
 
 Repo ini adalah aplikasi yang berfungsi penuh: **backend** (HTTP server + database + REST/SSE API),
 **decision engine** deterministik, dan **frontend** operator console yang interaktif. Satu engine yang sama
@@ -139,7 +139,7 @@ Ambang kebijakan ada di `src/engine.js` (`POLICY`):
 
 - **Overload**: WIM melebihi JBI terdaftar (+ toleransi 5%) → ditolak.
 - **Over-dimension**: dimensi LiDAR melebihi batas legal terdaftar → ditolak.
-- **Anomali berat**: |berat riil - (tare + kargo manifes)| melebihi 8% → ditolak.
+- **Anomali berat**: berat riil - (tare + kargo manifes)| melebihi 8% → ditolak.
 - **KIR**: masa uji berkala harus masih aktif.
 - **SPPB**: status pabean harus `APPROVED`.
 

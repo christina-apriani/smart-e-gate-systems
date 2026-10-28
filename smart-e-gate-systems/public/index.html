@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart E-Gate Systems — KEK</title>
+<meta name="author" content="Christina Apriani" />
+<meta name="description" content="Smart E-Gate Systems for a Special Economic Zone (KEK): IoT + AI automated truck gate with ODOL enforcement, Kemenhub KIR and CEISA customs integration, and real-time decisioning. Built by Christina Apriani." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232de2c6'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='%23042019' font-family='monospace' font-weight='bold'%3EE%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 20V9l9-5 9 5v11" stroke="#042019" stroke-width="2" stroke-linejoin="round"/><path d="M3 13h18M8 20v-5h8v5" stroke="#042019" stroke-width="2" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <h1>Smart E-Gate Systems</h1>
+        <div class="sub">KEK INDUSTROPOLIS BATANG · IoT + AI AUTONOMOUS GATE</div>
+      </div>
+    </div>
+    <div class="hstat">
+      <span class="pill" id="modePill"><span class="dot"></span><span id="modeText">connecting…</span></span>
+      <span class="pill clock" id="clock">--:--:--</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="tabs">
+    <button class="tab active" data-v="gate">🚦 Gate Control</button>
+    <button class="tab" data-v="input">🎛️ Sensor Input</button>
+    <button class="tab" data-v="lookup">🔎 Cek Data</button>
+    <button class="tab" data-v="registry">🗄️ Data Registry</button>
+    <button class="tab" data-v="map">🗺️ Live Map</button>
+    <button class="tab" data-v="log">📜 Event Log</button>
+  </nav>
+
+  <!-- stat tiles -->
+  <div class="stats">
+    <div class="stat"><div class="k" id="st_total">0</div><div class="l">Total Lintasan</div></div>
+    <div class="stat"><div class="k" id="st_green" style="color:var(--go)">0</div><div class="l">Jalur Hijau</div></div>
+    <div class="stat"><div class="k" id="st_red" style="color:var(--stop)">0</div><div class="l">Jalur Merah</div></div>
+    <div class="stat"><div class="k" id="st_rate" style="color:var(--brand)">0%</div><div class="l">Clearance Rate</div></div>
+  </div>
+
+  <!-- GATE CONTROL -->
+  <section class="view active" id="gate">
+    <div class="grid gate-grid">
+      <div class="card">
+        <h2><span class="bar"></span>Gerbang Otomatis <span class="right" id="gateName">—</span></h2>
+        <div class="lane-stage" id="laneStage">
+          <div class="lane-label" id="laneLabel">IDLE · menunggu kendaraan</div>
+          <div class="beacon"><span class="lamp r"></span><span class="lamp g"></span></div>
+          <div class="road"></div>
+          <div class="truck" id="truck">
+            <svg width="130" height="66" viewBox="0 0 130 66">
+              <rect x="2" y="12" width="78" height="40" rx="3" fill="#20303f" stroke="#38516a" stroke-width="2"/>
+              <rect x="8" y="18" width="66" height="10" rx="2" fill="#2de2c6" opacity="0.5"/>
+              <text x="41" y="46" text-anchor="middle" font-family="monospace" font-size="11" fill="#9fe8dd" id="truckPlate">—</text>
+              <rect x="82" y="22" width="34" height="30" rx="3" fill="#2a3f52" stroke="#38516a" stroke-width="2"/>
+              <rect x="96" y="27" width="16" height="12" rx="2" fill="#bfe9ff"/>
+              <circle cx="22" cy="56" r="7" fill="#0d0f12" stroke="#4a5a6e" stroke-width="2"/>
+              <circle cx="46" cy="56" r="7" fill="#0d0f12" stroke="#4a5a6e" stroke-width="2"/>
+              <circle cx="100" cy="56" r="7" fill="#0d0f12" stroke="#4a5a6e" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="barrier-post"></div>
+          <div class="barrier-arm" id="barrier"></div>
+          <div class="verdict" id="verdict"></div>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn go" id="btnRandom">▶ Simulasikan Truk Masuk</button>
+          <select class="x" id="presetSelect" style="max-width:280px;width:auto"></select>
+          <button class="btn ghost sm" id="btnPreset">Jalankan Preset</button>
+          <span class="pill" id="sirenPill" style="display:none">🔊 SIRINE AKTIF</span>
+        </div>
+        <p class="faint" style="font-size:12px;margin-top:10px">Pipeline berjalan otomatis dalam milidetik: sensor IoT menangkap data, AI memproses, API pemerintah diverifikasi, lalu keputusan gerbang diambil.</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="bar"></span>Pipeline Keputusan · 4 Tahap</h2>
+        <div class="pipeline" id="pipeline">
+          <div class="stage" data-s="s1"><div class="ico">📡</div><div class="body"><div class="st-top"><span class="st-name">1 · Tangkap Sensor IoT</span><span class="badge wait">menunggu</span></div><div class="st-sub">WIM · LiDAR 3D · Kamera HD / OCR</div><div class="st-detail"></div></div></div>
+          <div class="stage" data-s="s2"><div class="ico">🧠</div><div class="body"><div class="st-top"><span class="st-name">2 · Pemrosesan AI</span><span class="badge wait">menunggu</span></div><div class="st-sub">AI Vision ODOL · AI Prediktif anomali berat</div><div class="st-detail"></div></div></div>
+          <div class="stage" data-s="s3"><div class="ico">🛰️</div><div class="body"><div class="st-top"><span class="st-name">3 · Sinkronisasi API</span><span class="badge wait">menunggu</span></div><div class="st-sub">Kemenhub KIR · CEISA Bea Cukai SPPB</div><div class="st-detail"></div></div></div>
+          <div class="stage" data-s="s4"><div class="ico">⚖️</div><div class="body"><div class="st-top"><span class="st-name">4 · Keputusan Gerbang</span><span class="badge wait">menunggu</span></div><div class="st-sub">Jalur Hijau / Jalur Merah</div><div class="st-detail"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2><span class="bar"></span>Aliran Kejadian Real-Time</h2>
+      <div class="ticker" id="ticker"><div class="empty">Belum ada lintasan. Jalankan simulasi untuk memulai.</div></div>
+    </div>
+  </section>
+
+  <!-- SENSOR INPUT -->
+  <section class="view" id="input">
+    <div class="grid cols-2">
+      <div class="card">
+        <h2><span class="bar"></span>Input Data Sensor (Manual)</h2>
+        <p class="faint" style="font-size:12px;margin-bottom:4px">Masukkan pembacaan sensor atau pilih kendaraan terdaftar, lalu jalankan melalui gerbang.</p>
+        <label class="f">Kendaraan terdaftar (opsional)</label>
+        <select class="x" id="i_vehicle"><option value="">— pilih / isi manual —</option></select>
+        <div class="field-row">
+          <div><label class="f">Pelat (OCR)</label><input class="x" id="i_plate" placeholder="B 9114 KDT" /></div>
+          <div><label class="f">Kode kontainer</label><input class="x" id="i_container" placeholder="TGHU 2048115" /></div>
+        </div>
+        <label class="f">Berat WIM (kg)</label>
+        <input class="x" id="i_wim" type="number" placeholder="32800" />
+        <div class="field-row-3">
+          <div><label class="f">Panjang (mm)</label><input class="x" id="i_len" type="number" placeholder="12100" /></div>
+          <div><label class="f">Lebar (mm)</label><input class="x" id="i_wid" type="number" placeholder="2490" /></div>
+          <div><label class="f">Tinggi (mm)</label><input class="x" id="i_hei" type="number" placeholder="4150" /></div>
+        </div>
+        <label class="f">OCR confidence (0–1)</label>
+        <input class="x" id="i_conf" type="number" step="0.01" min="0" max="1" placeholder="0.97" />
+        <div class="row" style="margin-top:16px">
+          <button class="btn" id="btnEvaluate">⚙ Proses Melalui Gerbang</button>
+          <button class="btn ghost sm" id="btnFillValid">Isi contoh valid</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2><span class="bar"></span>Hasil Evaluasi <span class="right" id="resLane"></span></h2>
+        <div id="resultPane"><div class="empty">Jalankan evaluasi untuk melihat rincian keputusan per tahap.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOOKUP -->
+  <section class="view" id="lookup">
+    <div class="card">
+      <h2><span class="bar"></span>Cek Data Kendaraan / Kontainer</h2>
+      <div class="row">
+        <input class="x" id="lk_q" placeholder="Masukkan pelat (B 9114 KDT) atau kode kontainer (TGHU 2048115)" style="max-width:420px" />
+        <button class="btn" id="btnLookup">Cek</button>
+      </div>
+      <div id="lookupPane" style="margin-top:16px"><div class="empty">Masukkan pelat atau kode kontainer untuk melihat data gabungan kendaraan, manifes, dan pabean.</div></div>
+    </div>
+  </section>
+
+  <!-- REGISTRY -->
+  <section class="view" id="registry">
+    <div class="card" style="margin-bottom:18px">
+      <h2><span class="bar"></span>Kendaraan Terdaftar <span class="right"><button class="btn sm" id="btnAddVehicle">+ Tambah</button></span></h2>
+      <div style="overflow-x:auto"><table class="tbl" id="tblVehicles"></table></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h2><span class="bar"></span>Manifes <span class="right"><button class="btn sm" id="btnAddManifest">+ Tambah</button></span></h2>
+        <div style="overflow-x:auto"><table class="tbl" id="tblManifests"></table></div>
+      </div>
+      <div class="card">
+        <h2><span class="bar"></span>Dokumen Pabean (SPPB) <span class="right"><button class="btn sm" id="btnAddCustoms">+ Tambah</button></span></h2>
+        <div style="overflow-x:auto"><table class="tbl" id="tblCustoms"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section class="view" id="map-view">
+    <div class="card">
+      <h2><span class="bar"></span>Peta Real-Time · Akses Gerbang KEK <span class="right" id="mapGate">—</span></h2>
+      <div id="map"></div>
+      <div class="map-legend">
+        <span><i class="dotc" style="background:#2de2c6"></i> Lokasi Gerbang</span>
+        <span><i class="dotc" style="background:#19e37d"></i> Truk lolos (hijau)</span>
+        <span><i class="dotc" style="background:#ff3b57"></i> Truk ditolak (merah)</span>
+        <span class="faint">Truk dianimasikan mendekati gerbang saat diproses.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section class="view" id="log">
+    <div class="card">
+      <h2><span class="bar"></span>Log Kejadian Gerbang <span class="right"><button class="btn ghost sm" id="btnRefreshLog">Muat ulang</button></span></h2>
+      <div class="row" style="margin-bottom:12px">
+        <select class="x" id="logFilter" style="max-width:180px;width:auto"><option value="">Semua jalur</option><option value="GREEN">Hijau</option><option value="RED">Merah</option></select>
+      </div>
+      <div style="overflow-x:auto"><table class="tbl" id="tblLog"></table></div>
+    </div>
+  </section>
+
+  <footer>
+    <div>Dibangun oleh <b class="sig">Christina Apriani</b> · Smart E-Gate Systems</div>
+    <div class="sig">IoT + AI · ODOL · Kemenhub KIR · CEISA Bea Cukai</div>
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<!-- modal -->
+<div id="modalBackdrop" style="position:fixed;inset:0;background:rgba(4,6,10,.75);backdrop-filter:blur(4px);z-index:150;display:none;place-items:center;padding:20px">
+  <div id="modalBox" style="background:linear-gradient(180deg,#0f1621,#131b28);border:1px solid #2a3a4f;border-radius:14px;max-width:560px;width:100%;padding:24px;max-height:86vh;overflow:auto"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="js/engine.js"></script>
+<script src="js/seed.js"></script>
+<script src="js/api.js"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

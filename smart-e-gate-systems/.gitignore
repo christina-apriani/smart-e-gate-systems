@@ -1,0 +1,10 @@
+node_modules/
+*.log
+.DS_Store
+.env
+data/egate.db
+data/egate.db-journal
+data/*.sqlite
+coverage/
+.vscode/
+.idea/

@@ -1,0 +1,30 @@
+{
+  "name": "smart-e-gate-systems",
+  "version": "1.0.0",
+  "description": "Smart E-Gate Systems for KEK (Special Economic Zone) — IoT + AI automated truck gate control with ODOL enforcement and customs integration. Authored by Christina Apriani.",
+  "author": "Christina Apriani",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node --no-warnings server.js",
+    "dev": "node --no-warnings --watch server.js",
+    "seed": "node --no-warnings src/db.js --reseed",
+    "test": "node --no-warnings test/engine.test.js"
+  },
+  "keywords": [
+    "smart-gate",
+    "kek",
+    "iot",
+    "ai",
+    "odol",
+    "weigh-in-motion",
+    "customs",
+    "ceisa",
+    "full-stack"
+  ],
+  "dependencies": {}
+}

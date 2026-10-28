@@ -4,7 +4,7 @@
 
 ### Gerbang Otonom IoT + AI untuk Kawasan Ekonomi Khusus (KEK)
 
-**Keputusan gerbang otomatis dalam hitungan milidetik — fisik ODOL + dokumen pabean, satu alur.**
+**Keputusan gerbang otomatis dalam hitungan milidetik - fisik ODOL + dokumen pabean, satu alur.**
 
 Full-stack: sensor IoT → pemrosesan AI → sinkronisasi API pemerintah → keputusan Jalur Hijau / Jalur Merah.
 
@@ -33,20 +33,20 @@ dipakai server dan browser, sehingga logika keputusan tidak pernah berbeda di an
 ## Logika 4 tahap
 
 ```
-  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
-  │ 1 · IoT      │──▶│ 2 · AI       │──▶│ 3 · API Gov  │──▶│ 4 · Keputusan│
-  │ WIM · LiDAR  │   │ Vision ODOL  │   │ Kemenhub KIR │   │ Hijau/Merah  │
-  │ Kamera/OCR   │   │ Prediktif    │   │ CEISA SPPB   │   │ palang/sirine│
-  └──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘
+  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐      ┌──────────────┐
+  │ 1 · IoT      │ ──▶ │ 2 · AI      │ ──▶ │ 3 · API Gov  │ ──▶ │ 4 · Keputusan│
+  │ WIM · LiDAR  │     │ Vision ODOL  │     │ Kemenhub KIR │      │ Hijau/Merah  │
+  │ Kamera/OCR   │     │ Prediktif    │     │ CEISA SPPB   │      │ palang/sirine│
+  └──────────────┘     └──────────────┘     └──────────────┘      └──────────────┘
 ```
 
-1. **Tangkap sensor IoT** — Weight-In-Motion (berat), LiDAR (dimensi 3D), kamera HD (pelat + kode kontainer),
+1. **Tangkap sensor IoT** - Weight-In-Motion (berat), LiDAR (dimensi 3D), kamera HD (pelat + kode kontainer),
    tanpa truk berhenti total.
-2. **Pemrosesan AI** — *AI Vision* mendeteksi modifikasi ilegal / ODOL dan membaca pelat (OCR). *AI Prediktif*
+2. **Pemrosesan AI** - *AI Vision* mendeteksi modifikasi ilegal / ODOL dan membaca pelat (OCR). *AI Prediktif*
    membandingkan berat riil WIM dengan berat manifes untuk mendeteksi anomali (indikasi manipulasi).
-3. **Sinkronisasi API** — cek masa aktif **Uji KIR** ke database Kemenhub, dan status **SPPB** ke sistem
+3. **Sinkronisasi API** - cek masa aktif **Uji KIR** ke database Kemenhub, dan status **SPPB** ke sistem
    **CEISA Bea Cukai**.
-4. **Keputusan otomatis** — jika **lolos uji fisik ODOL DAN dokumen pabean valid** → **Jalur Hijau**, palang
+4. **Keputusan otomatis** - jika **lolos uji fisik ODOL DAN dokumen pabean valid** → **Jalur Hijau**, palang
    terbuka, lalu log manifes dikirim ke Bea Cukai. Jika salah satu melanggar atau ada anomali berat →
    **Jalur Merah**, palang terkunci, sirine berbunyi, truk diarahkan ke pemeriksaan fisik / putar balik.
 
@@ -57,7 +57,7 @@ dipakai server dan browser, sehingga logika keputusan tidak pernah berbeda di an
 | **🚦 Gate Control** | Visual gerbang animatif (palang, truk, beacon, sirine) dengan pipeline 4 tahap yang menyala real-time dan verdict Hijau/Merah. Tombol simulasi truk masuk + preset skenario. |
 | **🎛️ Sensor Input** | Input manual pembacaan sensor (WIM, dimensi, OCR) atau pilih kendaraan terdaftar, lalu proses dengan rincian lengkap per tahap. |
 | **🔎 Cek Data** | Cari pelat / kode kontainer, lihat data gabungan kendaraan + manifes + status pabean. |
-| **🗄️ Data Registry** | CRUD penuh untuk kendaraan, manifes, dan dokumen SPPB — tambah, ubah, hapus. |
+| **🗄️ Data Registry** | CRUD penuh untuk kendaraan, manifes, dan dokumen SPPB - tambah, ubah, hapus. |
 | **🗺️ Live Map** | Peta OpenStreetMap real-time: lokasi gerbang KEK Batang + truk dianimasikan mendekati gerbang, berwarna sesuai keputusan. |
 | **📜 Event Log** | Riwayat seluruh lintasan dengan filter jalur, alasan penolakan, dan metrik. |
 
@@ -139,7 +139,7 @@ Ambang kebijakan ada di `src/engine.js` (`POLICY`):
 
 - **Overload**: WIM melebihi JBI terdaftar (+ toleransi 5%) → ditolak.
 - **Over-dimension**: dimensi LiDAR melebihi batas legal terdaftar → ditolak.
-- **Anomali berat**: |berat riil − (tare + kargo manifes)| melebihi 8% → ditolak.
+- **Anomali berat**: |berat riil - (tare + kargo manifes)| melebihi 8% → ditolak.
 - **KIR**: masa uji berkala harus masih aktif.
 - **SPPB**: status pabean harus `APPROVED`.
 
@@ -147,7 +147,7 @@ Jalur Hijau hanya jika **semua** terpenuhi. Pelanggaran apa pun → Jalur Merah 
 
 ## Catatan teknis
 
-- Backend murni modul inti Node (`http`, `node:sqlite`) — nol dependency, mudah di-deploy, mudah diaudit.
+- Backend murni modul inti Node (`http`, `node:sqlite`) - nol dependency, mudah di-deploy, mudah diaudit.
 - Integrasi Kemenhub & CEISA ditulis sebagai fungsi async bershape produksi (`src/govApi.js`); endpoint resmi
   tinggal menggantikan stub tanpa mengubah orchestrator.
 - Peta memakai Leaflet + OpenStreetMap (tanpa API key). Jika tile tidak dapat dimuat, modul peta gagal dengan
